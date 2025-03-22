@@ -3,6 +3,7 @@ import Transaction, { ITransaction } from '../models/transaction.model';
 import { ICustomer } from '../../../libraries/shared-types/src';
 import mongoose from 'mongoose';
 import axios from 'axios';
+import { getCustomerByGsm, updateCustomerBalance } from '../utils/transaction.utils';
 
 const CUSTOMER_SERVICE_URL = 'http://localhost:8081';
 
@@ -13,11 +14,10 @@ export const transfer = async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const senderResp = await axios.get(`${CUSTOMER_SERVICE_URL}/customer/gsm/${from}`);
-        const receiverResp = await axios.get(`${CUSTOMER_SERVICE_URL}/customer/gsm/${to}`);
-    
-        const sender: ICustomer = senderResp.data.customer;
-        const receiver: ICustomer = receiverResp.data.customer;
+        const [sender, receiver] = await Promise.all([
+            getCustomerByGsm(from),
+            getCustomerByGsm(to)
+        ]);
 
         if (!sender || !receiver) {
             throw new Error('Sender or receiver not found');
@@ -30,19 +30,24 @@ export const transfer = async (req: Request, res: Response) => {
         if (sender.gsmNumber === receiver.gsmNumber) {
             throw new Error('Cannot transfer to yourself');
         };
-      
-        const senderBalance = sender.balance - amount;
-        const receiverBalance = receiver.balance + amount;
 
-        await axios.patch(`${CUSTOMER_SERVICE_URL}/customer/${sender.gsmNumber}/balance`, { balance: senderBalance });
-        await axios.patch(`${CUSTOMER_SERVICE_URL}/customer/${receiver.gsmNumber}/balance`, { balance: receiverBalance });
+        const newBalance = sender.balance - amount;
 
-        await Transaction.create([{ sender: sender.gsmNumber, receiver: receiver.gsmNumber, amount, type: 'transfer' }], { session });
+        await Promise.all([
+            updateCustomerBalance(sender.gsmNumber, newBalance),
+            updateCustomerBalance(receiver.gsmNumber, receiver.balance + amount),
+            Transaction.create([{
+                sender: sender.gsmNumber,
+                receiver: receiver.gsmNumber,
+                amount,
+                type: 'transfer'
+            }], { session }),
+            session.commitTransaction()
+        ]);
 
-        await session.commitTransaction();
         session.endSession();
 
-        res.status(200).json({ message: 'Transfer sucessfull' });
+        res.status(200).json({ message: 'Transfer sucessfull', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
@@ -56,24 +61,32 @@ export const topUp = async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const customerResp = await axios.get(`${CUSTOMER_SERVICE_URL}/customer/gsm/${gsmNumber}`);
+
+        if (amount <= 0) {
+            throw new Error('Amount must be greater than 0');
+        };
     
-        const customer: ICustomer = customerResp.data.customer;
+        const customer: ICustomer = await getCustomerByGsm(gsmNumber);
 
         if (!customer) {
             throw new Error('customer not found');
         };
 
-        const customerBalance = customer.balance + amount;//check - amount
+        const newBalance = customer.balance + amount;
+       
+        await Promise.all([
+            updateCustomerBalance(customer.gsmNumber, newBalance),
+            Transaction.create([{
+                receiver: customer.gsmNumber,
+                amount,
+                type: 'top-up'
+            }], { session }),
+            session.commitTransaction()
+        ]);
 
-        await axios.patch(`${CUSTOMER_SERVICE_URL}/customer/${customer.gsmNumber}/balance`, { balance: customerBalance });
-
-        await Transaction.create([{ receiver: customer.gsmNumber, amount, type: 'top-up' }], { session });
-
-        await session.commitTransaction();
         session.endSession();
 
-        res.status(200).json({ message: 'Top-up sucessfull' });
+        res.status(200).json({ message: 'Top-up sucessfull', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
@@ -86,24 +99,27 @@ export const purchase = async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const customerResp = await axios.get(`${CUSTOMER_SERVICE_URL}/customer/gsm/${gsmNumber}`);
-    
-        const customer: ICustomer = customerResp.data.customer;
+        const customer: ICustomer = await getCustomerByGsm(gsmNumber);
 
         if (!customer) {
             throw new Error('customer not found');
         };
 
-        const customerBalance = customer.balance - amount;
+        const newBalance = customer.balance - amount;
 
-        await axios.patch(`${CUSTOMER_SERVICE_URL}/customer/${customer.gsmNumber}/balance`, { balance: customerBalance });
+        await Promise.all([
+            updateCustomerBalance(customer.gsmNumber, newBalance),
+            Transaction.create([{
+                receiver: customer.gsmNumber,
+                amount,
+                type: 'purchase'
+            }], { session }),
+            session.commitTransaction()
+        ]);
 
-        await Transaction.create([{ receiver: customer.gsmNumber, amount, type: 'purchase' }], { session });
-
-        await session.commitTransaction();
         session.endSession();
 
-        res.status(200).json({ message: 'Purchase sucessfull' });
+        res.status(200).json({ message: 'Purchase sucessfull', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
@@ -127,29 +143,27 @@ export const refund = async (req: Request, res: Response) => {
             throw new Error('Refund amount cannot be greater than purchase amount');
         }
 
-        const customerResp = await axios.get(`${CUSTOMER_SERVICE_URL}/customer/gsm/${gsmNumber}`);
-        const customer: ICustomer = customerResp.data.customer;
+        const customer: ICustomer = await getCustomerByGsm(gsmNumber);
 
         if (!customer) {
             throw new Error('Customer not found');
         };
 
-        const customerBalance = customer.balance + amount;
-        await axios.patch(`${CUSTOMER_SERVICE_URL}/customer/${customer.gsmNumber}/balance`, 
-            { balance: customerBalance }
-        );
+        const newBalance = customer.balance + amount;
 
-        await Transaction.create([{
-            receiver: customer.gsmNumber,
-            amount,
-            type: 'refund',
-            relatedTransaction: lastPurchase._id
-        }], { session });
-
-        await session.commitTransaction();
+        await Promise.all([
+            updateCustomerBalance(customer.gsmNumber, newBalance),
+            Transaction.create([{
+                receiver: customer.gsmNumber,
+                amount,
+                type: 'refund',
+                relatedTransaction: lastPurchase._id
+            }], { session }),
+            session.commitTransaction()
+        ]);
         session.endSession();
 
-        res.status(200).json({ message: 'Refund successful' });
+        res.status(200).json({ message: 'Refund successful', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
