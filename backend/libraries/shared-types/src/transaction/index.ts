@@ -3,4 +3,5 @@ export interface ITransaction extends Document {
     receiver: string;
     amount: number;
     type: 'top-up' | 'transfer' | 'refund' | 'purchase';
-  };
+    relatedTransaction?: string;
+};
