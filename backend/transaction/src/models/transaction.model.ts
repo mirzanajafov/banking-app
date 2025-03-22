@@ -9,10 +9,10 @@ export interface ITransaction extends Document {
 
 const TransactionSchema = new mongoose.Schema(
   {
-    sender: { type: String, enum: ['top-up', 'purchase', 'refund', 'transfer'], required: true },
-    receiver: { type: String, required: true },
+    sender: { type: String,  required: false },
+    receiver: { type: String, required: false },
     amount: { type: Number, required: true },
-    type: { type: String, required: true }
+    type: { type: String, enum: ['top-up', 'purchase', 'refund', 'transfer'], required: true }
   },
   { timestamps: true }
 );
