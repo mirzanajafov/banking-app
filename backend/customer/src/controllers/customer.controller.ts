@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import Customer, { ICustomer } from '../models/customer.model';
-import { get } from 'mongoose';
 
 export const createCustomer = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -83,3 +82,16 @@ export const customerLogin = async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+export const getCustomerByGsmNumber = async (req: Request, res: Response) => {
+    try {
+        const { gsmNumber } = req.params;
+        const customer: ICustomer | null = await Customer.findOne({ gsmNumber });
+        if (!customer) {
+            throw new Error('Customer not found');
+        };
+        res.status(200).json({ customer });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
