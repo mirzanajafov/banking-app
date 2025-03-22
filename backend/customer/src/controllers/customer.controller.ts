@@ -53,8 +53,8 @@ export const getCustomerById = async (req: Request, res: Response) => {
 export const updateCustomerBalance = async (req: Request, res: Response) => {
     try {
         const { balance } = req.body;
-        const { id } = req.params;
-        const customer: ICustomer = await Customer.findByIdAndUpdate(id, { balance
+        const { gsmNumber } = req.params;
+        const customer: ICustomer = await Customer.findOneAndUpdate({ gsmNumber }, { balance
         }, { new: true });
     
         if (!customer) {

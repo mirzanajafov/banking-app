@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/customer', createCustomer);
 router.get('/customer/:id', getCustomerById);
-router.patch('/customer/:id/balance', updateCustomerBalance);
+router.patch('/customer/:gsmNumber/balance', updateCustomerBalance);
 router.get('/customers', getCustomers);
 router.post('/customer/login', customerLogin);
 router.get('/customer/gsm/:gsmNumber', getCustomerByGsmNumber);
