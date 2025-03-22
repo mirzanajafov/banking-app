@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 8081;
+const PORT = process.env.PORT || 8082;
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

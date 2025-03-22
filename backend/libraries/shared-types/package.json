@@ -1,0 +1,16 @@
+{
+  "name": "@banking/shared-types",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf ./node_modules ./dist"
+  },
+  "keywords": [],
+  "author": "Mirza",
+  "license": "ISC",
+  "description": "Types and interfaces that any service can access if needed",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
