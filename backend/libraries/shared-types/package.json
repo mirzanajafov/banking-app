@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "Types and interfaces that any service can access if needed",
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "http-status-codes": "^2.3.0"
   }
 }
