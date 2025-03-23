@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import { TransactionError } from '../../../libraries/shared-types/src';
+import { ValidationError } from '../../../libraries/shared-types/src';
 
 const schemas = {
     transfer: Joi.object({
@@ -30,7 +30,7 @@ export const validateRequest = (operationType: keyof typeof schemas) => {
         const { error } = schemas[operationType].validate(req.body);
         
         if (error) {
-            throw new TransactionError(error.details[0].message, 400);
+            throw new ValidationError(error.details[0].message, 400);
         }
         
         next();
