@@ -1,7 +1,7 @@
 import express from 'express';
 import connectDB from './config/db';
 import transactionRoutes from './routes/transaction.routes';
-import { errorHandler } from './middleware/error.middleware';
+import { errorHandler } from '../../libraries/errorMiddleware';
 import { rateLimiter } from './middleware/rateLimit.middleware';
 
 connectDB();

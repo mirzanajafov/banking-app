@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ICustomer, CustomerNotFoundError } from '../../../libraries/shared-types/src';
+import { ICustomer, CustomerNotFoundError } from '../../../libraries/shared-types';
 
 const CUSTOMER_SERVICE_URL = 'http://localhost:8081';
 
