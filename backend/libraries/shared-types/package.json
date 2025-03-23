@@ -1,7 +1,6 @@
 {
   "name": "@banking/shared-types",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf ./node_modules ./dist"

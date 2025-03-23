@@ -8,7 +8,7 @@ import {
     InvalidTransferError,
     NoPurchaseFoundError,
     TransactionError
-} from '../../../libraries/shared-types';
+} from '../../../../libraries/shared-types';
 import mongoose from 'mongoose';
 import { getCustomerByGsm, updateCustomerBalance } from '../utils/transaction.utils';
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import { ValidationError } from '../../../libraries/shared-types';
+import { ValidationError } from '../../../../libraries/shared-types';
 
 const schemas = {
     transfer: Joi.object({

@@ -4,7 +4,7 @@ import {
     CustomerNotFoundError, 
     InvalidCustomerDataError, 
     DuplicateGsmError
-} from '../../../libraries/shared-types';
+} from '../../../../libraries/shared-types';
 
 
 export const createCustomer = async (req: Request, res: Response): Promise<void> => {
