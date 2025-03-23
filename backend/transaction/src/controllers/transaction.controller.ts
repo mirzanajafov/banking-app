@@ -3,7 +3,7 @@ import Transaction, { ITransaction } from '../models/transaction.model';
 import { 
     ICustomer, 
     InsufficientBalanceError, 
-    CustomerNotFoundError,
+    InvalidCustomer,
     InvalidAmountError,
     InvalidTransferError,
     NoPurchaseFoundError,
@@ -24,7 +24,7 @@ export const transfer = async (req: Request, res: Response, next: NextFunction) 
         ]);
 
         if (!sender || !receiver) {
-            throw new CustomerNotFoundError();
+            throw new InvalidCustomer();
         };
 
         if (sender.balance < amount) {
@@ -72,7 +72,7 @@ export const topUp = async (req: Request, res: Response, next: NextFunction) => 
         const customer: ICustomer = await getCustomerByGsm(gsmNumber);
 
         if (!customer) {
-            throw new CustomerNotFoundError();
+            throw new InvalidCustomer();
         };
 
         const newBalance = customer.balance + amount;
@@ -105,7 +105,7 @@ export const purchase = async (req: Request, res: Response, next: NextFunction) 
         const customer: ICustomer = await getCustomerByGsm(gsmNumber);
 
         if (!customer) {
-            throw new CustomerNotFoundError();
+            throw new InvalidCustomer();
         };
 
         const newBalance = customer.balance - amount;
@@ -149,7 +149,7 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
         const customer: ICustomer = await getCustomerByGsm(gsmNumber);
 
         if (!customer) {
-            throw new CustomerNotFoundError();
+            throw new InvalidCustomer();
         };
 
         const newBalance = customer.balance + amount;
