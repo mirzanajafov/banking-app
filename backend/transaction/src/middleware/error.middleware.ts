@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import winston from "winston";
-import { TransactionError } from '../../../libraries/shared-types/src';
+import { BaseError } from '../../../libraries/shared-types/src';
 
 const logger = winston.createLogger({
   level: "error",
@@ -13,7 +13,7 @@ const logger = winston.createLogger({
 export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error(error.message);
 
-  if (error instanceof TransactionError) {
+  if (error instanceof BaseError) {
      res.status(error.statusCode).json({
       status: 'error',
       message: error.message,
@@ -21,5 +21,8 @@ export const errorHandler = (error: Error, req: Request, res: Response, next: Ne
      });
     return;
   }
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      status: 'error',
+      message: error.message
+     });
 };
