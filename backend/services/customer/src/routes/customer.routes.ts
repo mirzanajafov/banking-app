@@ -4,10 +4,7 @@ import { createCustomer, updateCustomerBalance, getCustomerByGsmNumber } from '.
 const router = express.Router();
 
 router.post('/customer', createCustomer);
-// router.get('/customer/:id', getCustomerById);
-router.patch('/customer/:gsmNumber/balance', updateCustomerBalance);
-// router.get('/customers', getCustomers);
-// router.post('/customer/login', customerLogin);
 router.get('/customer/:gsmNumber', getCustomerByGsmNumber);
+router.patch('/customer/:gsmNumber/balance', updateCustomerBalance);
 
 export default router;

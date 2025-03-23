@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Customer, { ICustomer } from '../models/customer.model';
 import { 
-    CustomerNotFoundError, 
-    InvalidCustomerDataError, 
+    CustomerNotFoundError,
     DuplicateGsmError
 } from '../../../../libraries/shared-types';
 
@@ -35,31 +34,6 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
     }
 };
 
-// export const getCustomers = async (req: Request, res: Response) => {
-//     try {
-//         const customers: ICustomer[] = await Customer.find();
-
-//         res.status(200).json({ customers });
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-// export const getCustomerById = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const { id } = req.params;
-//         const customer: ICustomer | null = await Customer.findById(id);
-
-//         if (!customer) {
-//             throw new CusstomerNotFoundError(id);
-//         };
-
-//         res.status(200).json({ customer });
-//     } catch (error) {
-//         next(error);
-//     }
-// };
-
 export const updateCustomerBalance = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { balance } = req.body;
@@ -77,21 +51,6 @@ export const updateCustomerBalance = async (req: Request, res: Response, next: N
         
     } 
 };
-
-// export const customerLogin = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const { gsmNumber } = req.body;
-//         const customer: ICustomer | null = await Customer.findOne({ gsmNumber });
-
-//         if (!customer) {
-//             throw new CusstomerNotFoundError(gsmNumber);
-//         };
-
-//         res.status(200).json({ customer });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
 
 export const getCustomerByGsmNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
