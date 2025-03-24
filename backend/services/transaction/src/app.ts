@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.json());
 app.use(rateLimiter);
-app.use('/', transactionRoutes);
+app.use('/transaction', transactionRoutes);
 
 app.use(errorHandler);
 

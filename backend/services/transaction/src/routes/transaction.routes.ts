@@ -4,9 +4,9 @@ import { validateRequest } from '../../../../libraries/requestValidationMiddlewa
 
 const router = express.Router();
 
-router.post('/transaction/transfer', validateRequest('transfer'), transfer);
-router.post('/transaction/topup', validateRequest('topUp'), topUp);
-router.post('/transaction/purchase', validateRequest('purchase'), purchase);
-router.post('/transaction/refund', validateRequest('refund'), refund);
+router.post('/transfer', validateRequest('transfer'), transfer);
+router.post('/topup', validateRequest('topUp'), topUp);
+router.post('/purchase', validateRequest('purchase'), purchase);
+router.post('/refund', validateRequest('refund'), refund);
 
 export default router;

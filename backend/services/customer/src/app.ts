@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.json());
 app.use(rateLimiter);
-app.use('/', customerRoutes);
+app.use('/customer', customerRoutes);
 app.use(errorHandler);
 
 export default app;

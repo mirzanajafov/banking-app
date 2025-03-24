@@ -4,8 +4,8 @@ import { validateRequest } from '../../../../libraries/requestValidationMiddlewa
 
 const router = express.Router();
 
-router.post('/customer', validateRequest("customerCreate"), createCustomer);
-router.get('/customer/:gsmNumber', validateRequest("customerGetByGsmNumber"), getCustomerByGsmNumber);
-router.patch('/customer/:gsmNumber/balance', validateRequest("customerUpdateBalance"), updateCustomerBalance);
+router.post('/', validateRequest("customerCreate"), createCustomer);
+router.get('/:gsmNumber', validateRequest("customerGetByGsmNumber"), getCustomerByGsmNumber);
+router.patch('/:gsmNumber/balance', validateRequest("customerUpdateBalance"), updateCustomerBalance);
 
 export default router;
