@@ -6,7 +6,7 @@ import {
 } from '../../../../libraries/shared-types';
 
 
-export const createCustomer = async (req: Request, res: Response): Promise<void> => {
+export const createCustomer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { name, surname, birthDate, gsmNumber, balance } = req.body;
 
@@ -30,7 +30,7 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
         await customer.save();
         res.status(201).json({ customer, message: 'Customer created successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 

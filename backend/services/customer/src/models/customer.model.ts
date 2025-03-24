@@ -5,7 +5,7 @@ export interface ICustomer extends Document {
   surname: string;
   birthDate: Date;
   gsmNumber: string;
-  balance: number;
+  balance?: number;
 };
 
 const CustomerSchema: Schema = new Schema(
@@ -18,5 +18,11 @@ const CustomerSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+CustomerSchema.set("toJSON", {
+  transform: (doc: any, retObject: any) => {
+    retObject.birthDate = retObject.birthDate.toISOString().split("T")[0];
+  },
+});
 
 export default mongoose.model<ICustomer>("Customer", CustomerSchema);
