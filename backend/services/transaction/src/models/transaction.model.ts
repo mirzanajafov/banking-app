@@ -6,6 +6,7 @@ export interface ITransaction extends Document {
   amount: number;
   type: 'top-up' | 'transfer' | 'refund' | 'purchase';
   relatedTransaction?: string;
+  refunded?: boolean;
 };
 
 const TransactionSchema = new mongoose.Schema(
@@ -14,7 +15,11 @@ const TransactionSchema = new mongoose.Schema(
     receiver: { type: String, required: false },
     amount: { type: Number, required: true },
     type: { type: String, enum: ['top-up', 'purchase', 'refund', 'transfer'], required: true },
-    relatedTransaction: { type: String, required: false }
+    relatedTransaction: { type: String, required: false },
+    refunded: { type: Boolean, required: false,
+      default: function(this: ITransaction) {
+        return this.type === 'purchase' ? false : undefined;
+      }}
   },
   { timestamps: true }
 );

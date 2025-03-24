@@ -113,7 +113,7 @@ export const purchase = async (req: Request, res: Response, next: NextFunction) 
         await Promise.all([
             updateCustomerBalance(customer.gsmNumber, newBalance),
             Transaction.create([{
-                receiver: customer.gsmNumber,
+                sender: customer.gsmNumber,
                 amount,
                 type: 'purchase'
             }], { session }),
@@ -136,11 +136,15 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
     session.startTransaction();
 
     try {
-        const lastPurchase = await Transaction.findOne({ receiver: gsmNumber, type: 'purchase' }).sort({ createdAt: -1 });
+        const lastPurchase = await Transaction.findOne({ sender: gsmNumber, type: 'purchase' }).sort({ createdAt: -1 });
 
         if (!lastPurchase) {
             throw new NoPurchaseFoundError();
         };
+
+        if (lastPurchase.refunded) {
+            throw new TransactionError('Purchase already refunded');
+        }
 
         if (lastPurchase.amount < amount) {
             throw new Error('Refund amount cannot be greater than purchase amount');
@@ -154,6 +158,7 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
 
         const newBalance = customer.balance + amount;
 
+        await Transaction.findByIdAndUpdate(lastPurchase._id, { $set: { refunded: true } }, { session }),
         await Promise.all([
             updateCustomerBalance(customer.gsmNumber, newBalance),
             Transaction.create([{
