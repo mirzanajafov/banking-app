@@ -1,6 +1,6 @@
 import express from 'express';
 import { transfer, topUp, purchase, refund } from '../controllers/transaction.controller';
-import { validateRequest } from '../middleware/requestValidation.middleware';
+import { validateRequest } from '../../../../libraries/requestValidationMiddleware';
 
 const router = express.Router();
 
