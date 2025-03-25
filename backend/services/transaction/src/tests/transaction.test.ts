@@ -12,7 +12,7 @@ describe('Transaction routes', () => {
         jest.clearAllMocks();
     });
 
-    describe('POST /transaction', () => {
+    describe('POST /transaction/transfer', () => {
         it('should transfer money between customers', async () => {
 
             mockedAxios.get.mockImplementation((url) => {

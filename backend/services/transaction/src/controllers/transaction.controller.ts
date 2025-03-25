@@ -49,13 +49,12 @@ export const transfer = async (req: Request, res: Response, next: NextFunction) 
             session.commitTransaction()
         ]);
 
-        session.endSession();
-
         res.status(200).json({ message: 'Transfer sucessfull', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
-        session.endSession();
         next(error);
+    } finally{
+        session.endSession();
     }
 };
 
@@ -83,17 +82,17 @@ export const topUp = async (req: Request, res: Response, next: NextFunction) => 
                 receiver: customer.gsmNumber,
                 amount,
                 type: 'top-up'
-            }], { session }),
-            session.commitTransaction()
+            }], { session })
         ]);
 
-        session.endSession();
+        await session.commitTransaction();
 
         res.status(200).json({ message: 'Top-up sucessfull', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
-        session.endSession();
         next(error);
+    } finally {
+        session.endSession();
     }
 }
 
@@ -117,16 +116,16 @@ export const purchase = async (req: Request, res: Response, next: NextFunction) 
                 amount,
                 type: 'purchase'
             }], { session }),
-            session.commitTransaction()
         ]);
 
-        session.endSession();
+        await session.commitTransaction()
 
         res.status(200).json({ message: 'Purchase sucessfull', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
-        session.endSession();
         next(error);
+    } finally {
+        session.endSession();
     }
 }
 
@@ -137,7 +136,6 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
 
     try {
         const lastPurchase = await Transaction.findOne({ sender: gsmNumber, type: 'purchase' }).sort({ createdAt: -1 });
-
         if (!lastPurchase) {
             throw new NoPurchaseFoundError();
         };
@@ -147,7 +145,7 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
         }
 
         if (lastPurchase.amount < amount) {
-            throw new Error('Refund amount cannot be greater than purchase amount');
+            throw new TransactionError('Refund amount cannot be greater than purchase amount');
         }
 
         const customer: ICustomer = await getCustomerByGsm(gsmNumber);
@@ -158,8 +156,8 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
 
         const newBalance = customer.balance + amount;
 
-        await Transaction.findByIdAndUpdate(lastPurchase._id, { $set: { refunded: true } }, { session }),
         await Promise.all([
+            Transaction.findByIdAndUpdate(lastPurchase._id, { $set: { refunded: true } }, { session }),    
             updateCustomerBalance(customer.gsmNumber, newBalance),
             Transaction.create([{
                 receiver: customer.gsmNumber,
@@ -167,14 +165,17 @@ export const refund = async (req: Request, res: Response, next: NextFunction) =>
                 type: 'refund',
                 relatedTransaction: lastPurchase._id
             }], { session }),
-            session.commitTransaction()
         ]);
-        session.endSession();
+
+        await session.commitTransaction()
 
         res.status(200).json({ message: 'Refund successful', balance: newBalance });
     } catch (error) {
         await session.abortTransaction();
-        session.endSession();
         next(error);
+    } finally {
+        if (session) {
+            session.endSession();
+        }
     }
 }
