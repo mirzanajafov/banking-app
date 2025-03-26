@@ -5,6 +5,7 @@
   "scripts": {
     "start": "ts-node src/server.ts",
     "dev": "nodemon src/server.ts",
+    "build": "tsc",
     "clean": "rm -rf ./node_modules"
   },
   "keywords": [],
